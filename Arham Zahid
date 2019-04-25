@@ -1,0 +1,203 @@
+
+# Initialisation functions.
+
+def set_small_screen():
+    Config.screen_size = Config.big_screen_size[0] / 2, Config.big_screen_size[1] / 2
+    Config.car_speed = Config.big_car_speed / 2
+    Config.computer_speed_advantage = float(Config.big_computer_speed_advantage) / 2
+    Config.size_dir = "small"
+
+def set_medium_screen():
+    Config.screen_size = int(Config.big_screen_size[0] * float(4) / 5), int(Config.big_screen_size[1] * float(4) / 5)
+    Config.car_speed = Config.big_car_speed * float(4) / 5
+    Config.computer_speed_advantage = float(Config.big_computer_speed_advantage) * float(4) / 5
+    Config.size_dir = "medium"
+
+def set_big_screen():
+    Config.screen_size = Config.big_screen_size
+    Config.car_speed = Config.big_car_speed
+    Config.computer_speed_advantage = Config.big_computer_speed_advantage
+    Config.size_dir = "big"
+
+def set_fullscreen():
+    Config.screen_flags = pygame.FULLSCREEN
+
+def set_window():
+    Config.screen_flags = 0
+
+def init(screen):
+    load_images()
+    load_music()
+
+    Config.character_size = init_images(Config.characters)
+
+    write(screen, cpos(5, 4), (255, 0, 0), "RALLY 7 PYGAME CABINET")
+    write(screen, cpos(5, 6), (255, 255, 255), "PRESS H FOR CONTROL SET")
+    pygame.display.flip()
+
+    Config.object_size = init_images(Config.objects)
+    Config.special_size = init_images(Config.specials)
+    Config.info_size = init_images(Config.infos)
+
+    write(screen, cpos(5, 8), (127, 127, 127), "LOADED IMAGES")
+    pygame.display.flip()
+
+    init_score_images(Config.objects)
+
+    Config.wall_sets = []
+    Config.wall_sets.append({})
+    init_walls(Config.wall_sets[0], (180, 0, 0), (0, 255, 0), "trees")
+
+    write(screen, cpos(5, 10), (0, 255, 0), "LOADED SCENERY 1")
+    pygame.display.flip()
+
+    Config.wall_sets.append({})
+    init_walls(Config.wall_sets[1], (0, 0, 180), (0, 255, 255), "ocean")
+
+    write(screen, cpos(5, 12), (0, 255, 255), "LOADED SCENERY 2")
+    pygame.display.flip()
+
+    Config.wall_sets.append({})
+    init_walls(Config.wall_sets[2], (100, 0, 0), (200, 100, 200), "mountains")
+
+    write(screen, cpos(5, 14), (200, 100, 100), "LOADED SCENERY 3")
+    pygame.display.flip()
+
+    time.sleep(1)
+
+def init_walls(set, start_colour, end_colour, scenery):
+    set["corner-top-left"] = image_copy(Config.objects["corner"])
+    set["corner-top-right"] = pygame.transform.rotate(Config.objects["corner"], 270)
+    set["corner-bottom-right"] = pygame.transform.rotate(Config.objects["corner"], 180)
+    set["corner-bottom-left"] = pygame.transform.rotate(Config.objects["corner"], 90)
+
+    set["edge-top"] = image_copy(Config.objects["edge"])
+    set["edge-right"] = pygame.transform.rotate(Config.objects["edge"], 270)
+    set["edge-bottom"] = pygame.transform.rotate(Config.objects["edge"], 180)
+    set["edge-left"] = pygame.transform.rotate(Config.objects["edge"], 90)
+
+    set["end-left"] = image_copy(Config.objects["end"])
+    set["end-top"] = pygame.transform.rotate(Config.objects["end"], 270)
+    set["end-right"] = pygame.transform.rotate(Config.objects["end"], 180)
+    set["end-bottom"] = pygame.transform.rotate(Config.objects["end"], 90)
+
+    set["wall-horizontal"] = image_copy(Config.objects["wall"])
+    set["wall-vertical"] = pygame.transform.rotate(Config.objects["wall"], 90)
+
+    set["solid-block"] = image_copy(Config.objects["solid"])
+    set["single-block"] = image_copy(Config.objects["single"])
+
+    for wall_name in Config.wall_names:
+        recolour(set[wall_name], start_colour, end_colour)
+
+    set["scenery"] = Config.objects[scenery]
+
+def image_copy(image):
+
+    """
+    Copy 'image' either using the Pygame 1.7 image copying method or an
+    equivalent method call.
+    """
+
+    if hasattr(image, "copy"):
+        return image.copy()
+    else:
+        return image.convert(image)
+
+def load_images():
+
+    "Load the images, forgetting any previously stored images."
+
+    Config.specials = {}
+    Config.objects = {}
+    Config.characters = {}
+    Config.infos = {}
+
+    for directory, dictionary in [(".", Config.objects), ("characters", Config.characters), ("special", Config.specials), ("info", Config.infos)]:
+        subdirectory = os.path.join(Config.data_dir, directory, Config.size_dir)
+
+        if not os.path.exists(subdirectory):
+            raise ConfigError, "Images directory %s not present: please download the full game or prepare the images as documented." % subdirectory
+
+        pattern = os.path.join(subdirectory, "*" + os.extsep + "png")
+        for filename in glob(pattern):
+            path, ext = os.path.splitext(filename)
+            path, name = os.path.split(path)
+            dictionary[name] = pygame.image.load(filename).convert_alpha()
+
+def load_music():
+    subdirectory = os.path.join(Config.data_dir, "music")
+
+    if not os.path.exists(subdirectory):
+        raise ConfigError, "Music directory %s not present: please download the full game or prepare the music as documented." % subdirectory
+
+    for music_type in Config.music_types:
+        pattern = os.path.join(subdirectory, "*" + os.extsep + music_type)
+        for filename in glob(pattern):
+            path, ext = os.path.splitext(filename)
+            path, name = os.path.split(path)
+            if not Config.music.has_key(name):
+                Config.music[name] = []
+            Config.music[name].append(filename)
+
+def play_music(name):
+    if not Config.have_audio:
+        set_music_end(1)
+        return 1
+
+    for music in Config.music[name]:
+        try:
+            pygame.mixer.music.load(music)
+            pygame.mixer.music.play()
+            set_music_end(1)
+            return 1
+        except pygame.error:
+            pass
+
+    return 0
+
+def stop_music():
+    if Config.have_audio:
+        pygame.mixer.music.fadeout(500)
+    set_music_end(0)
+
+def init_images(images):
+    max_size = 0, 0
+    for image in images.values():
+        max_size = max(max_size, image.get_rect().size)
+    return max_size
+
+def init_score_images(images):
+    for i in range(100, 2100, 100):
+        init_score_image(images, str(i), 4)
+    init_score_image(images, "x2", 5)
+    init_score_image(images, "???", 5)
+
+def init_score_image(images, s, width):
+    size = Config.character_size[0] * width
+    surface = pygame.Surface((size, size), pygame.SRCALPHA, 32)
+    write(surface, (0, size * float(3)/8), (255, 255, 255), s)
+    Config.objects[s] = pygame.transform.rotozoom(surface, 0, float(Config.object_size[0]) / size)
+
+def switch_map(map, new_walls=0):
+    for y in range(1, len(map) - 1):
+        row = map[y]
+        if new_walls:
+            new_row = row.replace(":", " ").replace("X", "#")
+        else:
+            new_row = row.replace(":", "#").replace("X", " ")
+        map[y] = new_row
+
+def convert_map(map):
+    for y in range(1, len(map) - 1):
+        row = map[y]
+        new_row = [row[0]]
+        for x in range(1, len(row) - 1):
+            pattern = map[y-1][x-1:x+2] + row[x-1:x+2] + map[y+1][x-1:x+2]
+            symbol = match_conversion(pattern)
+            if symbol is not None:
+                new_row.append(symbol)
+            else:
+                new_row.append(row[x])
+        new_row.append(row[x+1])
+        map[y] = "".join(new_row)
