@@ -6,3 +6,6 @@
 
 *Armaghan Hashmi TASK:
 (functing and co releation of the image with the game loop)
+
+*MUHAMMAD TASK:
+(FUNCTIONING OF SOUND AND CO-RELATION WITH THE GAME)
