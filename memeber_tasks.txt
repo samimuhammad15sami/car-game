@@ -3,3 +3,6 @@
 
 *ARHAM ZAHID'S TASK:
 (THE DEF GAMELOOP FUNCTIONING OF RUNNING THE GAME)
+
+*Armaghan Hashmi TASK:
+(functing and co releation of the image with the game loop)
