@@ -1,0 +1,16 @@
+def score(counter):
+font = pygame.font.SysFont(None, 20)
+text = font.render("Score : " + str(counter), True, black)
+game_display.blit(text, (0, 0))
+
+def enemy_car(enemyx, enemyy, enemy):
+game_display.blit(enemy, (enemyx, enemyy))
+
+
+def car(x, y):
+game_display.blit(car_img, (x, y))
+
+def text_objects(text, font):
+textSurface = font.render(text, True, black)
+return textSurface, textSurface.get_rect()
+
