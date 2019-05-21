@@ -1,0 +1,44 @@
+def intro():
+intro = True
+menu1_x = 200
+menu1_y = 400
+menu2_x = 500
+menu2_y = 400
+menu_width = 100
+menu_height = 50
+while intro:
+  for event in pygame.event.get():
+    if event.type == pygame.QUIT:
+      pygame.quit()
+quit()
+
+pygame.display.set_icon(car_img)
+
+pygame.draw.rect(game_display, black, (200, 400, 100, 50))
+pygame.draw.rect(game_display, black, (500, 400, 100, 50))
+
+game_display.fill(white)
+message_display("CAR RACING", 100, display_width/2, display_height/2)
+game_display.blit(logo, ((display_width / 2) - 100, 10))
+pygame.draw.rect(game_display, green, (200, 400, 100, 50))
+pygame.draw.rect(game_display, red, (500, 400, 100, 50))
+
+mouse = pygame.mouse.get_pos()
+click = pygame.mouse.get_pressed()
+
+
+if menu1_x < mouse[0] < menu1_x+menu_width and menu1_y < mouse[1] < menu1_y+menu_height:
+  pygame.draw.rect(game_display, blue, (200, 400, 100, 50))
+if click[0] == 1:
+  intro = False
+if menu2_x < mouse[0] < menu2_x+menu_width and menu2_y < mouse[1] < menu2_y+menu_height:
+  pygame.draw.rect(game_display, blue, (500, 400, 100, 50))
+if click[0] == 1:
+  pygame.quit()
+quit()
+
+message_display("Go", 40, menu1_x+menu_width/2, menu1_y+menu_height/2)
+message_display("Exit", 40, menu2_x+menu_width/2, menu2_y+menu_height/2)
+
+pygame.display.update()
+clock.tick(50)
